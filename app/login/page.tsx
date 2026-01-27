@@ -1,9 +1,26 @@
 'use client';
 
+import { useEffect } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
+import { useAuth0 } from '@/lib/auth0-context';
 
 export default function LoginPage() {
+  const { loginWithRedirect, isLoading } = useAuth0();
+
+  useEffect(() => {
+    // Automatically redirect to Auth0 when the page loads
+    const initiateLogin = async () => {
+      try {
+        await loginWithRedirect();
+      } catch (error) {
+        console.error('Failed to initiate login:', error);
+      }
+    };
+
+    if (!isLoading) {
+      initiateLogin();
+    }
+  }, [loginWithRedirect, isLoading]);
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
       {/* Left Side - Brand Section */}
@@ -89,34 +106,21 @@ export default function LoginPage() {
           <div className="bg-white">
             <div className="mb-8">
               <h2 className="text-3xl font-semibold text-gray-900 mb-2">
-                Iniciar sesión
+                Redirigiendo...
               </h2>
               <p className="text-gray-600">
-                Accedé a tu cuenta de forma segura
+                Te estamos redirigiendo a la página de inicio de sesión segura
               </p>
             </div>
 
             <div className="space-y-6">
-              {/* Auth0 Login Button */}
-              <a
-                href="/auth/login"
-                className="w-full flex items-center justify-center gap-3 bg-[#9b5ad7] text-white py-4 px-6 rounded-lg font-medium hover:bg-[#8a4ac4] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#9b5ad7] transition-all shadow-sm hover:shadow-md"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"
-                  />
-                </svg>
-                Continuar con Auth0
-              </a>
+              {/* Loading State */}
+              <div className="flex items-center justify-center py-8">
+                <div className="relative">
+                  <div className="w-16 h-16 border-4 border-[#9b5ad7]/20 rounded-full"></div>
+                  <div className="w-16 h-16 border-4 border-[#9b5ad7] border-t-transparent rounded-full animate-spin absolute top-0 left-0"></div>
+                </div>
+              </div>
 
               {/* Info Box */}
               <div className="bg-[#9b5ad7]/5 border border-[#9b5ad7]/10 rounded-lg p-4">
@@ -147,41 +151,6 @@ export default function LoginPage() {
                   </div>
                 </div>
               </div>
-
-              {/* Features */}
-              <div className="space-y-3 pt-2">
-                <div className="flex items-center gap-3 text-sm text-gray-600">
-                  <svg className="w-5 h-5 text-[#9b5ad7] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span>Autenticación de dos factores disponible</span>
-                </div>
-                <div className="flex items-center gap-3 text-sm text-gray-600">
-                  <svg className="w-5 h-5 text-[#9b5ad7] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span>Múltiples opciones de inicio de sesión</span>
-                </div>
-                <div className="flex items-center gap-3 text-sm text-gray-600">
-                  <svg className="w-5 h-5 text-[#9b5ad7] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span>Protección contra accesos no autorizados</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Sign Up Link */}
-            <div className="mt-8 text-center">
-              <p className="text-sm text-gray-600">
-                ¿No tenés una cuenta?{' '}
-                <a
-                  href="/auth/signup"
-                  className="font-medium text-[#9b5ad7] hover:text-[#8a4ac4] transition-colors"
-                >
-                  Crear cuenta
-                </a>
-              </p>
             </div>
           </div>
         </div>

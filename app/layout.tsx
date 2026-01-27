@@ -2,7 +2,7 @@ import React from "react"
 import type { Metadata } from 'next'
 
 import { Analytics } from '@vercel/analytics/next'
-import { Auth0Provider } from "@auth0/nextjs-auth0/client"
+import { Auth0ProviderClient } from '@/lib/auth0-provider-client'
 import './globals.css'
 
 import { Geist_Mono, Inter as V0_Font_Inter, Geist_Mono as V0_Font_Geist_Mono, Source_Serif_4 as V0_Font_Source_Serif_4 } from 'next/font/google'
@@ -13,8 +13,8 @@ const _geistMono = V0_Font_Geist_Mono({ subsets: ['latin'], weight: ["100","200"
 const _sourceSerif_4 = V0_Font_Source_Serif_4({ subsets: ['latin'], weight: ["200","300","400","500","600","700","800","900"] })
 
 export const metadata: Metadata = {
-  title: 'SocialFlow Design System',
-  description: 'Complete Design System for Social Media Management SaaS Platform',
+  title: 'Planer - Gestión de Redes Sociales',
+  description: 'Gestiona todas tus redes sociales desde un solo lugar',
   generator: 'v0.app',
   icons: {
     icon: [
@@ -41,11 +41,11 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
+    <html lang="es">
       <body className={`font-sans antialiased`}>
-        <Auth0Provider>
+        <Auth0ProviderClient>
           {children}
-        </Auth0Provider>
+        </Auth0ProviderClient>
         <Analytics />
       </body>
     </html>
