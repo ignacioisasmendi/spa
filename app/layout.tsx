@@ -2,7 +2,7 @@ import React from "react"
 import type { Metadata } from 'next'
 
 import { Analytics } from '@vercel/analytics/next'
-import { Auth0ProviderClient } from '@/lib/auth0-provider-client'
+import { Auth0Provider } from "@auth0/nextjs-auth0/client";
 import './globals.css'
 
 import { Geist_Mono, Inter as V0_Font_Inter, Geist_Mono as V0_Font_Geist_Mono, Source_Serif_4 as V0_Font_Source_Serif_4 } from 'next/font/google'
@@ -16,23 +16,6 @@ export const metadata: Metadata = {
   title: 'Planer - Gestión de Redes Sociales',
   description: 'Gestiona todas tus redes sociales desde un solo lugar',
   generator: 'v0.app',
-  icons: {
-    icon: [
-      {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
-      },
-      {
-        url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
-      },
-      {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
-      },
-    ],
-    apple: '/apple-icon.png',
-  },
 }
 
 export default function RootLayout({
@@ -43,9 +26,9 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className={`font-sans antialiased`}>
-        <Auth0ProviderClient>
+        <Auth0Provider>
           {children}
-        </Auth0ProviderClient>
+        </Auth0Provider>
         <Analytics />
       </body>
     </html>

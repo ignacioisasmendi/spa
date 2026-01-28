@@ -3,7 +3,6 @@
 import { useState } from "react"
 import {
   LayoutGrid,
-  Calendar,
   BarChart3,
   MessageSquare,
   Megaphone,
@@ -11,6 +10,7 @@ import {
   Settings,
   HelpCircle,
   Plus,
+  LogOutIcon,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -38,8 +38,41 @@ const socialChannels = [
   { name: "X", handle: "@socialflow", icon: "/x.svg", color: "bg-black" },
 ]
 
-export function DashboardSidebar() {
+interface DashboardSidebarProps {
+  user?: {
+    name?: string;
+    email?: string;
+    picture?: string;
+    nickname?: string;
+  };
+}
+
+// Helper function to get user initials
+function getUserInitials(name?: string, email?: string): string {
+  if (name) {
+    const nameParts = name.trim().split(' ');
+    if (nameParts.length >= 2) {
+      return `${nameParts[0][0]}${nameParts[nameParts.length - 1][0]}`.toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
+  }
+  if (email) {
+    return email.substring(0, 2).toUpperCase();
+  }
+  return 'U';
+}
+
+export function DashboardSidebar({ user }: DashboardSidebarProps) {
   const [activeNav, setActiveNav] = useState("Content")
+
+  console.log(user);
+
+  const logoutUrl = `/auth/logout?returnTo=${encodeURIComponent(process.env.NEXT_PUBLIC_LANDING_URL || '')}`;
+  
+  // Get user display values
+  const displayName = user?.name || user?.nickname || user?.email?.split('@')[0] || 'Usuario';
+  const displayEmail = user?.email || '';
+  const userInitials = getUserInitials(user?.name, user?.email);
 
   return (
     <aside className="flex h-full w-64 flex-col border-r border-border bg-card">
@@ -150,15 +183,31 @@ export function DashboardSidebar() {
             <HelpCircle className="h-5 w-5" />
             Help & Support
           </button>
+          <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
+            <LogOutIcon className="h-5 w-5" />
+            <a
+              href={logoutUrl}
+            >
+              Log out
+            </a>
+          </button>
         </div>
         <div className="mt-3 flex items-center gap-3 rounded-lg px-3 py-2">
           <Avatar className="h-8 w-8">
-            <AvatarImage src="/avatar.jpg" alt="User" />
-            <AvatarFallback className="bg-primary/10 text-primary text-xs">JD</AvatarFallback>
+            <AvatarImage src={user?.picture || "/avatar.jpg"} alt={displayName} />
+            <AvatarFallback className="bg-primary/10 text-primary text-xs">
+              {userInitials}
+            </AvatarFallback>
           </Avatar>
-          <div className="flex-1 text-left">
-            <p className="text-sm font-medium text-foreground">Jane Doe</p>
-            <p className="text-xs text-muted-foreground">jane@socialflow.io</p>
+          <div className="flex-1 text-left overflow-hidden">
+            <p className="text-sm font-medium text-foreground truncate">
+              {displayName}
+            </p>
+            {displayEmail && (
+              <p className="text-xs text-muted-foreground truncate">
+                {displayEmail}
+              </p>
+            )}
           </div>
         </div>
       </div>

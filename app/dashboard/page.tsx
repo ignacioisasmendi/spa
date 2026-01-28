@@ -1,21 +1,12 @@
 "use client"
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth0 } from '@/lib/auth0-context';
+import { useUser } from "@auth0/nextjs-auth0/client"
 import { ContentCalendar } from "@/components/dashboard/content-calendar"
 import { DashboardSidebar } from "@/components/dashboard/sidebar"
 import { DashboardTopbar } from "@/components/dashboard/topbar"
 
 export default function DashboardPage() {
-  const { isAuthenticated, isLoading } = useAuth0();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.push('/');
-    }
-  }, [isAuthenticated, isLoading, router]);
+  const { user, isLoading } = useUser();
 
   if (isLoading) {
     return (
@@ -31,13 +22,9 @@ export default function DashboardPage() {
     );
   }
 
-  if (!isAuthenticated) {
-    return null;
-  }
-
   return (
     <div className="flex h-screen bg-background">
-      <DashboardSidebar />
+      <DashboardSidebar user={user} />
       <div className="flex flex-1 flex-col overflow-hidden">
         <DashboardTopbar />
         <main className="flex-1 overflow-auto p-6">

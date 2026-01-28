@@ -1,7 +1,18 @@
 import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import { auth0 } from "./lib/auth0";
 
 export async function middleware(request: NextRequest) {
+
+  const { searchParams } = request.nextUrl
+  const action = searchParams.get('action')
+
+  if (action) {
+    // Redirect to /auth/login
+    const loginUrl = new URL('/auth/login', request.url);
+    return NextResponse.redirect(loginUrl);
+  }
+
   return await auth0.middleware(request);
 }
 
