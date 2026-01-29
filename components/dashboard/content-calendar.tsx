@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { MoreHorizontal, Edit2, Copy, Trash2, Clock, CheckCircle2, FileEdit, ExternalLink } from "lucide-react"
 import { SchedulePostModal } from "./schedule-post-modal"
-
 type PostStatus = "draft" | "scheduled" | "published"
 type Platform = "instagram" | "tiktok" | "facebook" | "linkedin" | "x"
 
@@ -180,22 +179,10 @@ export function ContentCalendar() {
   // Fetch publications from API
   useEffect(() => {
     const fetchPublications = async () => {
-      try {
-        setIsLoading(true)
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/publications`
-        )
-        if (res.ok) {
-          const data = await res.json()
-          setPublications(data)
-        } else {
-          console.error("Failed to fetch publications")
-        }
-      } catch (error) {
-        console.error("Error fetching publications:", error)
-      } finally {
-        setIsLoading(false)
-      }
+      const response = await fetch('/api/publications')
+      const data = await response.json()
+      setPublications(data)
+      setIsLoading(false)
     }
 
     fetchPublications()
@@ -238,17 +225,9 @@ export function ContentCalendar() {
   }
 
   const fetchPublicationsData = async () => {
-    try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/publications`
-      )
-      if (res.ok) {
-        const data = await res.json()
-        setPublications(data)
-      }
-    } catch (error) {
-      console.error("Error fetching publications:", error)
-    }
+    const response = await fetch('/api/publications')
+    const data = await response.json()
+    setPublications(data)
   }
 
   if (isLoading) {
