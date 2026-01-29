@@ -86,7 +86,7 @@ export function SchedulePostModal({
       }
 
       const res = await fetch(
-        `/api/publications`,
+        `api/publications`,
         {
           method: "POST",
           headers: {

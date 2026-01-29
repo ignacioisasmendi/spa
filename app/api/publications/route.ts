@@ -12,6 +12,8 @@ export async function GET(request: NextRequest) {
   try {
     // Get session server-side
     const session = await auth0.getSession();
+    console.log('session', session);
+    
 
     if (!session) {
       return NextResponse.json(
@@ -62,8 +64,9 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const session = await auth0.getSession();
+    console.log('session POST', session);
 
-    if (!session?.accessToken) {
+    if (!session?.tokenSet?.accessToken) {
       return NextResponse.json(
         { error: 'Not authenticated' },
         { status: 401 }
@@ -71,11 +74,13 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
+    console.log('body', body);
+    
 
     const response = await fetch(`${BACKEND_URL}/publications`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${session.accessToken}`,
+        'Authorization': `Bearer ${session?.tokenSet?.accessToken}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(body),
