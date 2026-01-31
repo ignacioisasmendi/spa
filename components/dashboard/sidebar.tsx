@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Link from "next/link"
 import {
   LayoutGrid,
   BarChart3,
@@ -16,6 +17,7 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -148,9 +150,18 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
           <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
             Channels
           </span>
-          <Button variant="ghost" size="icon" className="h-6 w-6">
-            <Plus className="h-4 w-4" />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Link href="/connect-social">
+                <Button variant="ghost" size="icon" className="h-6 w-6">
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </Link>
+            </TooltipTrigger>
+            <TooltipContent side="right">
+              <p>Connect social media</p>
+            </TooltipContent>
+          </Tooltip>
         </div>
         <ScrollArea className="h-[calc(100%-48px)] px-3">
           <div className="space-y-1 pb-3">

@@ -13,12 +13,20 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
+  // Allow OAuth callback routes without authentication
+  const publicRoutes = ['/auth/instagram/callback'];
+  const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
+  
+  if (isPublicRoute) {
+    return NextResponse.next();
+  }
+
   // Get the session
   const session = await auth0.getSession(request);
   const isAuthenticated = !!session?.user;
 
   // Define protected routes that require authentication
-  const protectedRoutes = ['/dashboard', '/instagram-publish', '/design-system'];
+  const protectedRoutes = ['/dashboard', '/instagram-publish', '/design-system', '/connect-social'];
   const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
 
   // Redirect unauthenticated users to landing page
