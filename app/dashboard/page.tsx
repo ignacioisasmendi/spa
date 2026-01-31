@@ -2,7 +2,7 @@
 
 import { useUser } from "@auth0/nextjs-auth0/client"
 import { useRouter } from "next/navigation"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { ContentCalendar } from "@/components/dashboard/content-calendar"
 import { DashboardSidebar } from "@/components/dashboard/sidebar"
 import { DashboardTopbar } from "@/components/dashboard/topbar"
@@ -10,6 +10,7 @@ import { DashboardTopbar } from "@/components/dashboard/topbar"
 export default function DashboardPage() {
   const { user, isLoading } = useUser();
   const router = useRouter();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     // Client-side fallback: redirect to landing if not authenticated
@@ -38,10 +39,14 @@ export default function DashboardPage() {
 
   return (
     <div className="flex h-screen bg-background">
-      <DashboardSidebar user={user} />
+      <DashboardSidebar 
+        user={user} 
+        isOpen={sidebarOpen}
+        onOpenChange={setSidebarOpen}
+      />
       <div className="flex flex-1 flex-col overflow-hidden">
-        <DashboardTopbar />
-        <main className="flex-1 overflow-auto p-6">
+        <DashboardTopbar onMenuClick={() => setSidebarOpen(true)} />
+        <main className="flex-1 overflow-auto p-4 lg:p-6">
           <ContentCalendar />
         </main>
       </div>

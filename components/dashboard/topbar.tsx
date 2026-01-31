@@ -10,6 +10,7 @@ import {
   Plus,
   Search,
   Bell,
+  Menu,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -28,7 +29,11 @@ const months = [
   "July", "August", "September", "October", "November", "December"
 ]
 
-export function DashboardTopbar() {
+interface DashboardTopbarProps {
+  onMenuClick?: () => void;
+}
+
+export function DashboardTopbar({ onMenuClick }: DashboardTopbarProps) {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [filterPlatforms, setFilterPlatforms] = useState<string[]>([])
 
@@ -56,18 +61,28 @@ export function DashboardTopbar() {
   }
 
   return (
-    <header className="flex h-16 shrink-0 items-center justify-between border-b border-border bg-card px-6">
+    <header className="flex h-16 shrink-0 items-center justify-between border-b border-border bg-card px-4 lg:px-6">
       {/* Left Section - Breadcrumb & Calendar Nav */}
-      <div className="flex items-center gap-6">
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-sm">
+      <div className="flex items-center gap-3 lg:gap-6">
+        {/* Mobile Menu Button */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-9 w-9 lg:hidden"
+          onClick={onMenuClick}
+        >
+          <Menu className="h-5 w-5" />
+        </Button>
+
+        {/* Breadcrumb - Hidden on mobile */}
+        <div className="hidden md:flex items-center gap-2 text-sm">
           <span className="text-muted-foreground">Content</span>
           <span className="text-muted-foreground">/</span>
           <span className="font-medium text-foreground">Calendar</span>
         </div>
 
         {/* Calendar Navigation */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 lg:gap-2">
           <Button
             variant="ghost"
             size="icon"
@@ -77,7 +92,7 @@ export function DashboardTopbar() {
             <ChevronLeft className="h-4 w-4" />
           </Button>
           <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold text-foreground min-w-[140px] text-center">
+            <span className="text-xs lg:text-sm font-semibold text-foreground min-w-[100px] lg:min-w-[140px] text-center">
               {currentMonth} {currentYear}
             </span>
           </div>
@@ -92,7 +107,7 @@ export function DashboardTopbar() {
           <Button
             variant="outline"
             size="sm"
-            className="ml-2 h-8 text-xs bg-transparent"
+            className="ml-1 lg:ml-2 h-8 text-xs bg-transparent"
             onClick={goToToday}
           >
             Today
@@ -101,22 +116,27 @@ export function DashboardTopbar() {
       </div>
 
       {/* Right Section - Actions */}
-      <div className="flex items-center gap-3">
-        {/* Search */}
-        <div className="relative">
+      <div className="flex items-center gap-2 lg:gap-3">
+        {/* Search - Hidden on small screens */}
+        <div className="relative hidden md:block">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Search content..."
-            className="h-9 w-48 pl-9 text-sm"
+            className="h-9 w-32 lg:w-48 pl-9 text-sm"
           />
         </div>
+
+        {/* Search Icon for mobile */}
+        <Button variant="ghost" size="icon" className="h-9 w-9 md:hidden">
+          <Search className="h-4 w-4" />
+        </Button>
 
         {/* Filter */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm" className="h-9 gap-2 bg-transparent">
               <Filter className="h-4 w-4" />
-              Filter
+              <span className="hidden sm:inline">Filter</span>
               {filterPlatforms.length > 0 && (
                 <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
                   {filterPlatforms.length}
@@ -168,14 +188,14 @@ export function DashboardTopbar() {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {/* Media Library */}
-        <Button variant="outline" size="sm" className="h-9 gap-2 bg-transparent">
+        {/* Media Library - Hidden on small screens */}
+        <Button variant="outline" size="sm" className="hidden lg:flex h-9 gap-2 bg-transparent">
           <ImageIcon className="h-4 w-4" />
           Media
         </Button>
 
-        {/* Share */}
-        <Button variant="outline" size="sm" className="h-9 gap-2 bg-transparent">
+        {/* Share - Hidden on small screens */}
+        <Button variant="outline" size="sm" className="hidden xl:flex h-9 gap-2 bg-transparent">
           <Share2 className="h-4 w-4" />
           Share
         </Button>
@@ -189,7 +209,7 @@ export function DashboardTopbar() {
         {/* Compose CTA */}
         <Button size="sm" className="h-9 gap-2">
           <Plus className="h-4 w-4" />
-          Compose
+          <span className="hidden sm:inline">Compose</span>
         </Button>
       </div>
     </header>
