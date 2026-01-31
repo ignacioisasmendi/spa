@@ -35,17 +35,18 @@ interface SocialPlatform {
   features: string[]
   permissions: string[]
   isActive?: boolean
-  expiresAt?: string
+  expiresAt?: string | null
   backendId?: string
+  platformUserId?: string | null
 }
 
 interface SocialAccountResponse {
   id: string
   platform: string
-  platformUserId: string
-  username: string
+  platformUserId: string | null
+  username: string | null
   isActive: boolean
-  expiresAt: string
+  expiresAt: string | null
   createdAt: string
   updatedAt: string
 }
@@ -163,11 +164,12 @@ function ConnectSocialPageContent() {
             if (backendAccount) {
               return {
                 ...platform,
-                connected: true,
-                connectedAccount: `@${backendAccount.username}`,
+                connected: backendAccount.isActive,
+                connectedAccount: backendAccount.username ? `@${backendAccount.username}` : undefined,
                 isActive: backendAccount.isActive,
                 expiresAt: backendAccount.expiresAt,
                 backendId: backendAccount.id,
+                platformUserId: backendAccount.platformUserId,
               }
             }
             
