@@ -31,25 +31,22 @@ function InstagramCallbackContent() {
 
     // Handle successful authorization
     if (code) {
-      // Send the code to backend
-      fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/instagram/callback`, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include', // For session cookies
-        body: JSON.stringify({ code, state })
-      })
-        .then(async (res) => {
-          const data = await res.json()
+      const connectInstagram = async () => {
+        try {
+          const response = await fetch('/api/auth/instagram/callback', {
+            method: 'POST',
+            headers: { 
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ code, state })
+          })
+
+          const data = await response.json()
           
-          if (!res.ok) {
+          if (!response.ok) {
             throw new Error(data.message || 'Failed to connect Instagram account')
           }
           
-          return data
-        })
-        .then((data) => {
           if (data.success) {
             setStatus('success')
             // Redirect after showing success message
@@ -59,14 +56,16 @@ function InstagramCallbackContent() {
           } else {
             throw new Error(data.message || 'Connection failed')
           }
-        })
-        .catch((error) => {
+        } catch (error) {
           console.error('Instagram connection error:', error)
           setStatus('error')
           setErrorMessage(
-            error.message || 'Failed to connect your Instagram account. Please try again.'
+            error instanceof Error ? error.message : 'Failed to connect your Instagram account. Please try again.'
           )
-        })
+        }
+      }
+
+      connectInstagram()
     } else {
       // No code and no error means something went wrong
       setStatus('error')
