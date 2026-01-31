@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -8,7 +8,7 @@ import { CheckCircle2, XCircle, Loader2, Instagram } from 'lucide-react'
 
 type Status = 'loading' | 'success' | 'error'
 
-export default function InstagramCallback() {
+function InstagramCallbackContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const [status, setStatus] = useState<Status>('loading')
@@ -179,5 +179,33 @@ export default function InstagramCallback() {
         </CardContent>
       </Card>
     </div>
+  )
+}
+
+// Loading fallback component
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen bg-background flex items-center justify-center p-6">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-pink-500">
+            <Loader2 className="h-8 w-8 text-white animate-spin" />
+          </div>
+          <CardTitle className="text-2xl">Connecting Instagram</CardTitle>
+          <CardDescription>
+            Please wait while we connect your Instagram account...
+          </CardDescription>
+        </CardHeader>
+      </Card>
+    </div>
+  )
+}
+
+// Main component with Suspense boundary
+export default function InstagramCallback() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <InstagramCallbackContent />
+    </Suspense>
   )
 }

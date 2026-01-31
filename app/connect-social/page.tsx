@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { Suspense, useState, useEffect } from "react"
 import { useUser } from "@auth0/nextjs-auth0/client"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -15,7 +15,8 @@ import {
   AlertCircle,
   ArrowLeft,
   Zap,
-  X
+  X,
+  Loader2
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { DashboardSidebar } from "@/components/dashboard/sidebar"
@@ -33,7 +34,7 @@ interface SocialPlatform {
   permissions: string[]
 }
 
-export default function ConnectSocialPage() {
+function ConnectSocialPageContent() {
   const { user, isLoading } = useUser()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -486,4 +487,28 @@ function SocialIcon({ platform }: { platform: string }) {
     default:
       return null
   }
+}
+
+// Loading fallback component
+function LoadingFallback() {
+  return (
+    <div className="flex h-screen items-center justify-center bg-background">
+      <div className="text-center">
+        <div className="relative w-16 h-16 mx-auto mb-4">
+          <div className="w-16 h-16 border-4 border-primary/20 rounded-full"></div>
+          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin absolute top-0 left-0"></div>
+        </div>
+        <p className="text-muted-foreground">Loading...</p>
+      </div>
+    </div>
+  )
+}
+
+// Main component with Suspense boundary
+export default function ConnectSocialPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <ConnectSocialPageContent />
+    </Suspense>
+  )
 }
