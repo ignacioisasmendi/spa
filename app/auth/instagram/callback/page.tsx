@@ -32,7 +32,7 @@ function InstagramCallbackContent() {
     // Handle successful authorization
     if (code) {
       // Send the code to backend
-      fetch('http://localhost:5000/auth/instagram/callback', {
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/instagram/callback`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
