@@ -67,8 +67,6 @@ function getUserInitials(name?: string, email?: string): string {
 export function DashboardSidebar({ user }: DashboardSidebarProps) {
   const [activeNav, setActiveNav] = useState("Content")
 
-  console.log(user);
-
   const logoutUrl = `/auth/logout?returnTo=${encodeURIComponent(process.env.NEXT_PUBLIC_LANDING_URL || '')}`;
   
   // Get user display values

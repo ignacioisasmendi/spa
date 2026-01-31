@@ -105,7 +105,6 @@ export function SchedulePostModal({
       if (res.ok) {
         // Success - close modal and reset form
         handleClose()
-        console.log("Post scheduled successfully!")
         // Call onSuccess callback to refresh calendar
         if (onSuccess) {
           onSuccess()

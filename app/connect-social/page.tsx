@@ -3,6 +3,7 @@
 import { Suspense, useState, useEffect } from "react"
 import { useUser } from "@auth0/nextjs-auth0/client"
 import { useRouter, useSearchParams } from "next/navigation"
+import Image from "next/image"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -16,7 +17,8 @@ import {
   ArrowLeft,
   Zap,
   X,
-  Loader2
+  Loader2,
+  RefreshCw
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { DashboardSidebar } from "@/components/dashboard/sidebar"
@@ -32,6 +34,20 @@ interface SocialPlatform {
   connectedAccount?: string
   features: string[]
   permissions: string[]
+  isActive?: boolean
+  expiresAt?: string
+  backendId?: string
+}
+
+interface SocialAccountResponse {
+  id: string
+  platform: string
+  platformUserId: string
+  username: string
+  isActive: boolean
+  expiresAt: string
+  createdAt: string
+  updatedAt: string
 }
 
 function ConnectSocialPageContent() {
@@ -40,6 +56,7 @@ function ConnectSocialPageContent() {
   const searchParams = useSearchParams()
   const [connecting, setConnecting] = useState<string | null>(null)
   const [showSuccessBanner, setShowSuccessBanner] = useState(false)
+  const [loadingAccounts, setLoadingAccounts] = useState(true)
   const [platforms, setPlatforms] = useState<SocialPlatform[]>([
     {
       id: "instagram",
@@ -106,22 +123,63 @@ function ConnectSocialPageContent() {
   useEffect(() => {
     if (!isLoading && !user) {
       router.push('/')
+      return
     }
 
     // Check if Instagram was just connected
     const instagramConnected = searchParams.get('instagram')
     if (instagramConnected === 'connected') {
       setShowSuccessBanner(true)
-      // Mark Instagram as connected
-      setPlatforms(platforms.map(p => 
-        p.id === 'instagram' 
-          ? { ...p, connected: true, connectedAccount: '@your_instagram' }
-          : p
-      ))
       // Auto-hide banner after 5 seconds
       setTimeout(() => setShowSuccessBanner(false), 5000)
+      // Reload social accounts after connection
+      fetchSocialAccounts()
+    } else if (user) {
+      // Load social accounts on mount
+      fetchSocialAccounts()
     }
   }, [user, isLoading, router, searchParams])
+
+  const fetchSocialAccounts = async () => {
+    setLoadingAccounts(true)
+    try {
+      const response = await fetch('/api/users/me/social-accounts')
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch social accounts')
+      }
+
+      const result = await response.json()
+      
+      if (result.success && result.data) {
+        // Update platforms with backend data
+        setPlatforms(prevPlatforms => 
+          prevPlatforms.map(platform => {
+            const backendAccount = result.data.find(
+              (acc: SocialAccountResponse) => acc.platform.toLowerCase() === platform.id
+            )
+            
+            if (backendAccount) {
+              return {
+                ...platform,
+                connected: true,
+                connectedAccount: `@${backendAccount.username}`,
+                isActive: backendAccount.isActive,
+                expiresAt: backendAccount.expiresAt,
+                backendId: backendAccount.id,
+              }
+            }
+            
+            return platform
+          })
+        )
+      }
+    } catch (error) {
+      console.error('Error fetching social accounts:', error)
+    } finally {
+      setLoadingAccounts(false)
+    }
+  }
 
   const connectInstagram = () => {
     const params = new URLSearchParams({
@@ -176,7 +234,7 @@ function ConnectSocialPageContent() {
     }, 1500)
   }
 
-  if (isLoading) {
+  if (isLoading || loadingAccounts) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
         <div className="text-center">
@@ -184,7 +242,9 @@ function ConnectSocialPageContent() {
             <div className="w-16 h-16 border-4 border-primary/20 rounded-full"></div>
             <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin absolute top-0 left-0"></div>
           </div>
-          <p className="text-muted-foreground">Loading...</p>
+          <p className="text-muted-foreground">
+            {isLoading ? 'Loading...' : 'Loading your accounts...'}
+          </p>
         </div>
       </div>
     )
@@ -286,29 +346,37 @@ function ConnectSocialPageContent() {
                   
                   <CardHeader>
                     <div className="flex items-start justify-between">
-                      <div className="flex items-start gap-4">
+                      <div className="flex items-center gap-4">
                         <div className={cn(
-                          "flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br shrink-0",
-                          platform.color
+                          "flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br shrink-0"
                         )}>
                           <SocialIcon platform={platform.icon} />
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
                             <CardTitle className="text-xl">{platform.name}</CardTitle>
-                            {platform.connected && (
+                            {platform.connected && platform.isActive && (
                               <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">
                                 <CheckCircle2 className="h-3 w-3" />
                                 Connected
                               </Badge>
                             )}
+                            {platform.connected && !platform.isActive && (
+                              <Badge variant="secondary" className="bg-yellow-500/10 text-yellow-600 border-yellow-500/20">
+                                <AlertCircle className="h-3 w-3" />
+                                Inactive
+                              </Badge>
+                            )}
                           </div>
-                          <CardDescription className="mt-1">
-                            {platform.description}
-                          </CardDescription>
+                          
                           {platform.connected && platform.connectedAccount && (
                             <p className="text-sm text-muted-foreground mt-2 font-medium">
                               {platform.connectedAccount}
+                            </p>
+                          )}
+                          {platform.connected && !platform.isActive && (
+                            <p className="text-xs text-yellow-600 mt-2">
+                              Connection expired or needs reauthorization
                             </p>
                           )}
                         </div>
@@ -350,7 +418,8 @@ function ConnectSocialPageContent() {
                     </div>
 
                     <div className="pt-2 flex gap-2">
-                      {platform.connected ? (
+                      {platform.connected && platform.isActive ? (
+                        // Active connection: Show Manage and Disconnect
                         <>
                           <Button
                             variant="outline"
@@ -371,7 +440,29 @@ function ConnectSocialPageContent() {
                             {connecting === platform.id ? "Disconnecting..." : "Disconnect"}
                           </Button>
                         </>
+                      ) : platform.connected && !platform.isActive ? (
+                        // Inactive connection: Show Reconnect button
+                        <Button
+                          onClick={() => handleConnect(platform.id)}
+                          disabled={connecting === platform.id}
+                          className="w-full bg-yellow-600 hover:bg-yellow-700"
+                          size="sm"
+                          variant="default"
+                        >
+                          {connecting === platform.id ? (
+                            <>
+                              <div className="mr-2 h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                              Reconnecting...
+                            </>
+                          ) : (
+                            <>
+                              <RefreshCw className="mr-2 h-4 w-4" />
+                              Reconnect {platform.name}
+                            </>
+                          )}
+                        </Button>
                       ) : (
+                        // Not connected: Show Connect button
                         <Button
                           onClick={() => handleConnect(platform.id)}
                           disabled={connecting === platform.id}
@@ -445,6 +536,36 @@ function ConnectSocialPageContent() {
 }
 
 function SocialIcon({ platform }: { platform: string }) {
+  // Map platform names to icon filenames
+  const iconMap: Record<string, string> = {
+    instagram: '/social-media-icons/instagram-icon.svg',
+    facebook: '/social-media-icons/facebook-icon.svg',
+    tiktok: '/social-media-icons/tiktok-icon.svg',
+    twitter: '/social-media-icons/x-icon.svg',
+    linkedin: '/social-media-icons/linkedin-icon.svg',
+    youtube: '/social-media-icons/youtube-icon.svg',
+  }
+
+  const iconSrc = iconMap[platform]
+
+  if (iconSrc) {
+    return (
+      <Image
+        src={iconSrc}
+        alt={`${platform} icon`}
+        width={24}
+        height={24}
+        className="w-6 h-6"
+      />
+    )
+  }
+
+  // Fallback to inline SVG if icon not found
+  return <InlineSocialIcon platform={platform} />
+}
+
+// Keep inline SVGs as fallback
+function InlineSocialIcon({ platform }: { platform: string }) {
   const iconClass = "h-6 w-6 text-white"
   
   switch (platform) {
